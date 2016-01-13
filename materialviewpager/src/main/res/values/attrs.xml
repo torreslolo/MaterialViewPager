@@ -20,6 +20,7 @@
         <attr name="viewpager_transparentToolbar" format="boolean"/>
         <attr name="viewpager_animatedHeaderImage" format="boolean"/>
         <attr name="viewpager_disableToolbar" format="boolean"/>
+        <attr name="viewpager_glueHeader" format="boolean"/>
 
     </declare-styleable>
 
