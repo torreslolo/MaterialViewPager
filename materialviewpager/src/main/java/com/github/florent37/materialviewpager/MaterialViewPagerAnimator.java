@@ -36,18 +36,20 @@ import static com.github.florent37.materialviewpager.Utils.setScale;
 
 /**
  * Created by florentchampigny on 24/04/15.
- *
+ * <p>
  * Listen to Scrollable inside MaterialViewPager
  * When notified scroll, dispatch the current scroll to other scrollable
- *
+ * <p>
  * Note : didn't want to translate the MaterialViewPager or intercept Scroll,
  * so added a ViewPager with scrollables containing a transparent placeholder on top
- *
+ * <p>
  * When scroll, animate the MaterialViewPager Header (toolbar, logo, color ...)
  */
 public class MaterialViewPagerAnimator {
 
     private static final String TAG = MaterialViewPagerAnimator.class.getSimpleName();
+
+    public static final float PAGER_TAB_STRIP_SIDE_MARGIN_DELAY = 0.7f;
 
     public static Boolean ENABLE_LOG = true;
 
@@ -157,7 +159,7 @@ public class MaterialViewPagerAnimator {
     public boolean onMaterialScrolled(Object source, float yOffset) {
 
         if(initialDistance == -1 || initialDistance == 0) {
-            initialDistance = mHeader.mPagerSlidingTabStrip.getTop() - mHeader.toolbar.getBottom();
+            initialDistance = getTabStripMotionSpace() - mHeader.toolbar.getBottom();
         }
 
         //only if yOffset changed
@@ -193,7 +195,7 @@ public class MaterialViewPagerAnimator {
 
         if(percent != 0) {
             //distance between pager & toolbar
-            float newDistance = ViewHelper.getY(mHeader.mPagerSlidingTabStrip) - mHeader.toolbar.getBottom();
+            float newDistance = ViewHelper.getY(mHeader.mPagerSlidingTabStrip) - mHeader.toolbar.getBottom() + getTabStripHeightIfGlue();
 
             percent = 1 - newDistance / initialDistance;
 
@@ -226,6 +228,13 @@ public class MaterialViewPagerAnimator {
                 }
             }
 
+            if (settings.glueHeader) {
+                ViewGroup.MarginLayoutParams params = (ViewGroup.MarginLayoutParams) mHeader.mPagerSlidingTabStrip.getLayoutParams();
+                int v = (int) (getTabStripHeightIfGlue() * Math.max(percent - PAGER_TAB_STRIP_SIDE_MARGIN_DELAY, 0) / (1 - PAGER_TAB_STRIP_SIDE_MARGIN_DELAY));
+                params.leftMargin = v;
+                params.rightMargin = v;
+            }
+
             lastPercent = percent; //save the percent
 
             if (mHeader.mPagerSlidingTabStrip != null) { //move the viewpager indicator
@@ -241,8 +250,8 @@ public class MaterialViewPagerAnimator {
                     ViewHelper.setTranslationY(mHeader.toolbarLayoutBackground, scrollTop);
 
                     //when
-                    if (ViewHelper.getY(mHeader.mPagerSlidingTabStrip) < mHeader.getToolbar().getBottom()) {
-                        float ty = mHeader.getToolbar().getBottom() - mHeader.mPagerSlidingTabStrip.getTop();
+                    if (ViewHelper.getY(mHeader.mPagerSlidingTabStrip) < mHeader.getToolbar().getBottom() - getTabStripHeightIfGlue()) {
+                        float ty = mHeader.getToolbar().getBottom() - getTabStripMotionSpace();
                         ViewHelper.setTranslationY(mHeader.mPagerSlidingTabStrip, ty);
                         ViewHelper.setTranslationY(mHeader.toolbarLayoutBackground, ty);
                     }
@@ -394,7 +403,18 @@ public class MaterialViewPagerAnimator {
     }
 
     private boolean toolbarJoinsTabs() {
-        return (mHeader.toolbar.getBottom() == mHeader.mPagerSlidingTabStrip.getTop() + ViewHelper.getTranslationY(mHeader.mPagerSlidingTabStrip));
+        return (mHeader.toolbar.getBottom() == getTabStripMotionSpace() + ViewHelper.getTranslationY(mHeader.mPagerSlidingTabStrip));
+    }
+
+    private int getTabStripMotionSpace() {
+        return mHeader.mPagerSlidingTabStrip.getTop() + getTabStripHeightIfGlue();
+    }
+
+    private int getTabStripHeightIfGlue() {
+        if (settings.glueHeader && mHeader.mPagerSlidingTabStrip != null) {
+            return mHeader.mPagerSlidingTabStrip.getHeight();
+        }
+        return 0;
     }
 
     /**
@@ -410,7 +430,7 @@ public class MaterialViewPagerAnimator {
                 firstScrollValue = yOffset;
 
             float translationY = firstScrollValue - yOffset;
-            
+
             if(translationY > 0) {
                 translationY = 0;
             }
