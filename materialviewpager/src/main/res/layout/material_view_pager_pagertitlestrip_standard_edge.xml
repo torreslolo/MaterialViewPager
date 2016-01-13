@@ -7,9 +7,8 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fadingEdge="horizontal"
-    android:fadingEdgeLength="80dp"
+    android:fadingEdgeLength="30dp"
     android:requiresFadingEdge="horizontal"
-
     app:pstsDividerPadding="20dp"
     app:pstsIndicatorColor="#FFF"
     app:pstsIndicatorHeight="4dp"
