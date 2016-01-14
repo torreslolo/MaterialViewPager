@@ -3,6 +3,7 @@ package com.github.florent37.materialviewpager;
 import android.annotation.TargetApi;
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Parcel;
@@ -19,6 +20,7 @@ import android.widget.RelativeLayout;
 
 import com.astuetz.PagerSlidingTabStrip;
 import com.github.florent37.materialviewpager.header.HeaderDesign;
+import com.github.florent37.materialviewpager.header.HeadersKeeper;
 import com.github.florent37.materialviewpager.header.MaterialViewPagerImageHelper;
 import com.nineoldandroids.view.ViewHelper;
 
@@ -79,7 +81,7 @@ public class MaterialViewPager extends FrameLayout implements ViewPager.OnPageCh
     //Class containing the configuration of the MaterialViewPager
     protected MaterialViewPagerSettings settings = new MaterialViewPagerSettings();
 
-    protected MaterialViewPager.Listener listener;
+    protected HeadersKeeper mHeadersKeeper;
 
     //region construct
 
@@ -109,7 +111,7 @@ public class MaterialViewPager extends FrameLayout implements ViewPager.OnPageCh
     @Override
     protected void onDetachedFromWindow() {
         MaterialViewPagerHelper.unregister(getContext());
-        listener = null;
+        mHeadersKeeper = null;
         super.onDetachedFromWindow();
     }
 
@@ -362,6 +364,7 @@ public class MaterialViewPager extends FrameLayout implements ViewPager.OnPageCh
 
     @Override
     public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+        // TODO Page Scroll, change header color
         if (positionOffset >= 0.5) {
             onPageSelected(position + 1);
         } else if (positionOffset <= -0.5) {
@@ -369,6 +372,9 @@ public class MaterialViewPager extends FrameLayout implements ViewPager.OnPageCh
         } else {
             onPageSelected(position);
         }
+
+        int color = mHeadersKeeper.getColorWithOffset(position,positionOffset);
+        setColor(color, 0);
     }
 
     public void notifyHeaderChanged() {
@@ -379,18 +385,14 @@ public class MaterialViewPager extends FrameLayout implements ViewPager.OnPageCh
 
     @Override
     public void onPageSelected(int position) {
-        if (position == lastPosition || listener == null)
+        if (position == lastPosition || mHeadersKeeper == null)
             return;
 
-        HeaderDesign headerDesign = listener.getHeaderDesign(position);
+        HeaderDesign headerDesign = mHeadersKeeper.getHeaderDesign(position);
         if (headerDesign == null)
             return;
 
         int fadeDuration = 400;
-        int color = headerDesign.getColor();
-        if (headerDesign.getColorRes() != 0) {
-            color = getContext().getResources().getColor(headerDesign.getColorRes());
-        }
 
         if (headerDesign.getDrawable() != null) {
             setImageDrawable(headerDesign.getDrawable(), fadeDuration);
@@ -398,7 +400,6 @@ public class MaterialViewPager extends FrameLayout implements ViewPager.OnPageCh
             setImageUrl(headerDesign.getImageUrl(), fadeDuration);
         }
 
-        setColor(color, fadeDuration);
 
         lastPosition = position;
     }
@@ -446,12 +447,8 @@ public class MaterialViewPager extends FrameLayout implements ViewPager.OnPageCh
                 };
     }
 
-    public void setMaterialViewPagerListener(Listener listener) {
-        this.listener = listener;
-    }
-
-    public interface Listener {
-        HeaderDesign getHeaderDesign(int page);
+    public void setMaterialViewHeadersKeeper(HeadersKeeper headersKeeper) {
+        mHeadersKeeper = headersKeeper;
     }
 
     public interface OnImageLoadListener {
