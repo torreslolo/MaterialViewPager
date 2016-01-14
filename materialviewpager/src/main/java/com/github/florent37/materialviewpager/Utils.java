@@ -3,6 +3,7 @@ package com.github.florent37.materialviewpager;
 import android.content.Context;
 import android.graphics.Color;
 import android.graphics.Rect;
+import android.support.annotation.ColorInt;
 import android.support.v4.view.ViewCompat;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -149,4 +150,25 @@ public class Utils {
         }
         return null;
     }
+
+    protected static float[] buildHSV(@ColorInt int color) {
+        final float[] hsv = new float[3];
+        Color.colorToHSV(color, hsv);
+        return hsv;
+    }
+
+    protected static float[] buildRGB(@ColorInt int color) {
+        final float[] rgb = new float[3];
+        rgb[0] = (color >> 16) & 0xFF;
+        rgb[1] = (color >> 8) & 0xFF;
+        rgb[2] = color & 0xFF;
+        return rgb;
+    }
+
+    @ColorInt
+    protected static int rgbToColor(int[] rgb) {
+        return (0xFF << 24) | (rgb[0] << 16) | (rgb[1] << 8) | rgb[2];
+    }
+
+
 }
