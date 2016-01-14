@@ -334,25 +334,35 @@ public class MaterialViewPagerAnimator {
      * @param duration the transition color animation duration
      */
     public void setColor(int color, int duration) {
-        ValueAnimator colorAnim = ObjectAnimator.ofInt(mHeader.headerBackground, "backgroundColor", settings.color, color);
-        colorAnim.setEvaluator(new ArgbEvaluator());
-        colorAnim.setDuration(duration);
-        colorAnim.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
-            @Override
-            public void onAnimationUpdate(ValueAnimator animation) {
-                final int animatedValue = (Integer) animation.getAnimatedValue();
-                int colorAlpha = colorWithAlpha(animatedValue, lastPercent);
-                mHeader.headerBackground.setBackgroundColor(colorAlpha);
-                mHeader.statusBackground.setBackgroundColor(colorAlpha);
-                mHeader.toolbar.setBackgroundColor(colorAlpha);
-                mHeader.toolbarLayoutBackground.setBackgroundColor(colorAlpha);
-                mHeader.mPagerSlidingTabStrip.setBackgroundColor(colorAlpha);
 
-                //set the new color as MaterialViewPager's color
-                settings.color = animatedValue;
-            }
-        });
-        colorAnim.start();
+//            ValueAnimator colorAnim = ObjectAnimator.ofInt(mHeader.headerBackground, "backgroundColor", settings.color, color);
+//            colorAnim.setEvaluator(new ArgbEvaluator());
+//            colorAnim.setDuration(duration);
+//            colorAnim.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+//                @Override
+//                public void onAnimationUpdate(ValueAnimator animation) {
+//                    final int animatedValue = (Integer) animation.getAnimatedValue();
+//                    int colorAlpha = colorWithAlpha(animatedValue, lastPercent);
+//                    mHeader.headerBackground.setBackgroundColor(colorAlpha);
+//                    mHeader.statusBackground.setBackgroundColor(colorAlpha);
+//                    mHeader.toolbar.setBackgroundColor(colorAlpha);
+//                    mHeader.toolbarLayoutBackground.setBackgroundColor(colorAlpha);
+//                    mHeader.mPagerSlidingTabStrip.setBackgroundColor(colorAlpha);
+//
+//                    //set the new color as MaterialViewPager's color
+//                    settings.color = animatedValue;
+//                }
+//            });
+
+            int colorAlpha = color;
+            mHeader.headerBackground.setBackgroundColor(colorAlpha);
+            mHeader.statusBackground.setBackgroundColor(colorAlpha);
+            mHeader.toolbar.setBackgroundColor(colorAlpha);
+            mHeader.toolbarLayoutBackground.setBackgroundColor(colorAlpha);
+            mHeader.mPagerSlidingTabStrip.setBackgroundColor(colorAlpha);
+            settings.color = color;
+            setColorPercent(lastPercent);
+
     }
 
     public void animateColorPercent(float percent, int duration) {
