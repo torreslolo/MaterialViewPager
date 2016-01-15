@@ -15,7 +15,6 @@ import com.github.ksoichiro.android.observablescrollview.ObservableWebView;
 import com.github.ksoichiro.android.observablescrollview.ScrollState;
 import com.nineoldandroids.animation.Animator;
 import com.nineoldandroids.animation.AnimatorListenerAdapter;
-import com.nineoldandroids.animation.ArgbEvaluator;
 import com.nineoldandroids.animation.ObjectAnimator;
 import com.nineoldandroids.animation.ValueAnimator;
 import com.nineoldandroids.view.ViewHelper;
@@ -550,6 +549,11 @@ public class MaterialViewPagerAnimator {
                     int yOffset = yOffsets.get(recyclerView);
 
                     yOffset += dy;
+
+                    if (yOffset < 0) {
+                        yOffset = 0;
+                    }
+
                     yOffsets.put(recyclerView, yOffset); //save the new offset
 
                     //first time you get 0, don't share it to others scrolls
