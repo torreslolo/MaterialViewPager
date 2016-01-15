@@ -118,7 +118,8 @@ public class MainActivity extends AppCompatActivity {
 
 
         mViewPager.getViewPager().setOffscreenPageLimit(mViewPager.getViewPager().getAdapter().getCount());
-        mViewPager.getPagerTitleStrip().setViewPager(mViewPager.getViewPager());
+        mViewPager.initPagerForTitleStrip();
+
 
         View logo = findViewById(R.id.logo_white);
         if (logo != null)

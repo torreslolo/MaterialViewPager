@@ -3,7 +3,6 @@ package com.github.florent37.materialviewpager;
 import android.annotation.TargetApi;
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Parcel;
@@ -23,6 +22,7 @@ import com.github.florent37.materialviewpager.header.HeaderDesign;
 import com.github.florent37.materialviewpager.header.HeadersKeeper;
 import com.github.florent37.materialviewpager.header.MaterialViewPagerImageHelper;
 import com.nineoldandroids.view.ViewHelper;
+import com.ogaclejapan.smarttablayout.SmartTabLayout;
 
 /**
  * Created by florentchampigny on 28/04/15.
@@ -243,8 +243,21 @@ public class MaterialViewPager extends FrameLayout implements ViewPager.OnPageCh
      *
      * @return the displayed tabs
      */
-    public PagerSlidingTabStrip getPagerTitleStrip() {
-        return (PagerSlidingTabStrip) pagerTitleStripContainer.findViewById(R.id.materialviewpager_pagerTitleStrip);
+    public View getPagerTitleStrip() {
+        return pagerTitleStripContainer.findViewById(R.id.materialviewpager_pagerTitleStrip);
+    }
+
+    /**
+     * Set ViewPager for pagerTitleStrip
+     */
+    public void initPagerForTitleStrip() {
+        View pagerTitleStrip = getPagerTitleStrip();
+
+        if (SmartTabLayout.class.isInstance(pagerTitleStrip)) {
+            ((SmartTabLayout) pagerTitleStrip).setViewPager(getViewPager());
+        } else if (PagerSlidingTabStrip.class.isInstance(pagerTitleStrip)) {
+            ((PagerSlidingTabStrip) pagerTitleStrip).setViewPager(getViewPager());
+        }
     }
 
     /**
