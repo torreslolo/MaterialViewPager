@@ -10,7 +10,7 @@ import static com.github.florent37.materialviewpager.Utils.pxToDp;
 
 /**
  * Created by florentchampigny on 29/04/15.
- *
+ * <p>
  * Save attributes given to MaterialViewPager from layout
  */
 public class MaterialViewPagerSettings implements Parcelable {
@@ -43,12 +43,15 @@ public class MaterialViewPagerSettings implements Parcelable {
     protected boolean animatedHeaderImage;
     protected boolean disableToolbar;
 
+    protected boolean glueHeader;
+
     /**
      * Retrieve attributes from the MaterialViewPager
+     *
      * @param context
      * @param attrs
      */
-    protected void handleAttributes(Context context, AttributeSet attrs){
+    protected void handleAttributes(Context context, AttributeSet attrs) {
         try {
             TypedArray styledAttrs = context.obtainStyledAttributes(attrs, R.styleable.MaterialViewPager);
             {
@@ -56,7 +59,7 @@ public class MaterialViewPagerSettings implements Parcelable {
             }
             {
                 pagerTitleStripId = styledAttrs.getResourceId(R.styleable.MaterialViewPager_viewpager_pagerTitleStrip, -1);
-                if(pagerTitleStripId == -1)
+                if (pagerTitleStripId == -1)
                     pagerTitleStripId = R.layout.material_view_pager_pagertitlestrip_standard;
             }
             {
@@ -105,6 +108,10 @@ public class MaterialViewPagerSettings implements Parcelable {
             {
                 disableToolbar = styledAttrs.getBoolean(R.styleable.MaterialViewPager_viewpager_disableToolbar, false);
             }
+            {
+                glueHeader = styledAttrs.getBoolean(R.styleable.MaterialViewPager_viewpager_glueHeader, false);
+            }
+
             styledAttrs.recycle();
         } catch (Exception e) {
             e.printStackTrace();
@@ -135,6 +142,7 @@ public class MaterialViewPagerSettings implements Parcelable {
         dest.writeByte(hideToolbarAndTitle ? (byte) 1 : (byte) 0);
         dest.writeByte(hideLogoWithFade ? (byte) 1 : (byte) 0);
         dest.writeByte(enableToolbarElevation ? (byte) 1 : (byte) 0);
+        dest.writeByte(glueHeader ? (byte) 1 : (byte) 0);
     }
 
     public MaterialViewPagerSettings() {
@@ -156,6 +164,7 @@ public class MaterialViewPagerSettings implements Parcelable {
         this.hideToolbarAndTitle = in.readByte() != 0;
         this.hideLogoWithFade = in.readByte() != 0;
         this.enableToolbarElevation = in.readByte() != 0;
+        this.glueHeader = in.readByte() != 0;
     }
 
     public static final Parcelable.Creator<MaterialViewPagerSettings> CREATOR = new Parcelable.Creator<MaterialViewPagerSettings>() {

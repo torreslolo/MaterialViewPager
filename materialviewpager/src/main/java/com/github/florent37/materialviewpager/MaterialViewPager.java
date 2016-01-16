@@ -7,6 +7,7 @@ import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.support.annotation.NonNull;
 import android.support.v4.view.ViewPager;
 import android.support.v7.widget.Toolbar;
 import android.util.AttributeSet;
@@ -19,15 +20,18 @@ import android.widget.RelativeLayout;
 
 import com.astuetz.PagerSlidingTabStrip;
 import com.github.florent37.materialviewpager.header.HeaderDesign;
+import com.github.florent37.materialviewpager.header.HeadersKeeper;
+import com.github.florent37.materialviewpager.header.ImagesPagerAdapter;
 import com.github.florent37.materialviewpager.header.MaterialViewPagerImageHelper;
 import com.nineoldandroids.view.ViewHelper;
+import com.ogaclejapan.smarttablayout.SmartTabLayout;
 
 /**
  * Created by florentchampigny on 28/04/15.
- * <p/>
+ * <p>
  * The main class of MaterialViewPager
  * To use in an xml layout with attributes viewpager_*
- * <p/>
+ * <p>
  * Display a preview with header, actual logo and fake cells
  */
 public class MaterialViewPager extends FrameLayout implements ViewPager.OnPageChangeListener {
@@ -79,7 +83,9 @@ public class MaterialViewPager extends FrameLayout implements ViewPager.OnPageCh
     //Class containing the configuration of the MaterialViewPager
     protected MaterialViewPagerSettings settings = new MaterialViewPagerSettings();
 
-    protected MaterialViewPager.Listener listener;
+    protected HeadersKeeper mHeadersKeeper;
+
+    private ViewPager mPagerHeader;
 
     //region construct
 
@@ -109,7 +115,7 @@ public class MaterialViewPager extends FrameLayout implements ViewPager.OnPageCh
     @Override
     protected void onDetachedFromWindow() {
         MaterialViewPagerHelper.unregister(getContext());
-        listener = null;
+        mHeadersKeeper = null;
         super.onDetachedFromWindow();
     }
 
@@ -151,7 +157,10 @@ public class MaterialViewPager extends FrameLayout implements ViewPager.OnPageCh
                 else
                     headerId = R.layout.material_view_pager_imageview_header;
             }
-            headerBackgroundContainer.addView(LayoutInflater.from(getContext()).inflate(headerId, headerBackgroundContainer, false));
+            View headerView = LayoutInflater.from(getContext()).inflate(headerId, headerBackgroundContainer, false);
+            findPagerHeader(headerView);
+
+            headerBackgroundContainer.addView(headerView);
         }
 
 
@@ -204,6 +213,14 @@ public class MaterialViewPager extends FrameLayout implements ViewPager.OnPageCh
         }
     }
 
+    private void findPagerHeader(View headerView) {
+        View pagerHeader = headerView.findViewById(R.id.materialviewpager_pagerHeader);
+        if (ViewPager.class.isInstance(pagerHeader)) {
+            mPagerHeader = (ViewPager) pagerHeader;
+        }
+
+    }
+
     private void initialiseHeights() {
         if (headerBackground != null) {
             headerBackground.setBackgroundColor(this.settings.color);
@@ -241,8 +258,21 @@ public class MaterialViewPager extends FrameLayout implements ViewPager.OnPageCh
      *
      * @return the displayed tabs
      */
-    public PagerSlidingTabStrip getPagerTitleStrip() {
-        return (PagerSlidingTabStrip) pagerTitleStripContainer.findViewById(R.id.materialviewpager_pagerTitleStrip);
+    public View getPagerTitleStrip() {
+        return pagerTitleStripContainer.findViewById(R.id.materialviewpager_pagerTitleStrip);
+    }
+
+    /**
+     * Set ViewPager for pagerTitleStrip
+     */
+    public void initPagerForTitleStrip() {
+        View pagerTitleStrip = getPagerTitleStrip();
+
+        if (SmartTabLayout.class.isInstance(pagerTitleStrip)) {
+            ((SmartTabLayout) pagerTitleStrip).setViewPager(getViewPager());
+        } else if (PagerSlidingTabStrip.class.isInstance(pagerTitleStrip)) {
+            ((PagerSlidingTabStrip) pagerTitleStrip).setViewPager(getViewPager());
+        }
     }
 
     /**
@@ -362,6 +392,13 @@ public class MaterialViewPager extends FrameLayout implements ViewPager.OnPageCh
 
     @Override
     public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+
+        if (mPagerHeader != null) {
+            int scrollX = mViewPager.getScrollX();
+            mPagerHeader.setScrollX(scrollX);
+        }
+
+        // TODO Page Scroll, change header color
         if (positionOffset >= 0.5) {
             onPageSelected(position + 1);
         } else if (positionOffset <= -0.5) {
@@ -369,6 +406,9 @@ public class MaterialViewPager extends FrameLayout implements ViewPager.OnPageCh
         } else {
             onPageSelected(position);
         }
+
+        int color = mHeadersKeeper.getColorWithOffset(position,positionOffset);
+        setColor(color, 0);
     }
 
     public void notifyHeaderChanged() {
@@ -379,26 +419,23 @@ public class MaterialViewPager extends FrameLayout implements ViewPager.OnPageCh
 
     @Override
     public void onPageSelected(int position) {
-        if (position == lastPosition || listener == null)
+        if (position == lastPosition || mHeadersKeeper == null)
             return;
 
-        HeaderDesign headerDesign = listener.getHeaderDesign(position);
+        HeaderDesign headerDesign = mHeadersKeeper.getHeaderDesign(position);
         if (headerDesign == null)
             return;
 
-        int fadeDuration = 400;
-        int color = headerDesign.getColor();
-        if (headerDesign.getColorRes() != 0) {
-            color = getContext().getResources().getColor(headerDesign.getColorRes());
+        if (mPagerHeader == null) {
+            int fadeDuration = 400;
+
+            if (headerDesign.getDrawable() != null) {
+                setImageDrawable(headerDesign.getDrawable(), fadeDuration);
+            } else {
+                setImageUrl(headerDesign.getImageUrl(), fadeDuration);
+            }
         }
 
-        if (headerDesign.getDrawable() != null) {
-            setImageDrawable(headerDesign.getDrawable(), fadeDuration);
-        } else {
-            setImageUrl(headerDesign.getImageUrl(), fadeDuration);
-        }
-
-        setColor(color, fadeDuration);
 
         lastPosition = position;
     }
@@ -446,12 +483,12 @@ public class MaterialViewPager extends FrameLayout implements ViewPager.OnPageCh
                 };
     }
 
-    public void setMaterialViewPagerListener(Listener listener) {
-        this.listener = listener;
-    }
-
-    public interface Listener {
-        HeaderDesign getHeaderDesign(int page);
+    public void setMaterialViewHeadersKeeper(@NonNull HeadersKeeper headersKeeper) {
+        if (mPagerHeader != null) {
+            mPagerHeader.setAdapter(new ImagesPagerAdapter(getContext(), headersKeeper));
+            mPagerHeader.setOffscreenPageLimit(headersKeeper.size());
+        }
+        mHeadersKeeper = headersKeeper;
     }
 
     public interface OnImageLoadListener {

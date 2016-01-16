@@ -15,7 +15,6 @@ import com.github.ksoichiro.android.observablescrollview.ObservableWebView;
 import com.github.ksoichiro.android.observablescrollview.ScrollState;
 import com.nineoldandroids.animation.Animator;
 import com.nineoldandroids.animation.AnimatorListenerAdapter;
-import com.nineoldandroids.animation.ArgbEvaluator;
 import com.nineoldandroids.animation.ObjectAnimator;
 import com.nineoldandroids.animation.ValueAnimator;
 import com.nineoldandroids.view.ViewHelper;
@@ -36,18 +35,20 @@ import static com.github.florent37.materialviewpager.Utils.setScale;
 
 /**
  * Created by florentchampigny on 24/04/15.
- *
+ * <p>
  * Listen to Scrollable inside MaterialViewPager
  * When notified scroll, dispatch the current scroll to other scrollable
- *
+ * <p>
  * Note : didn't want to translate the MaterialViewPager or intercept Scroll,
  * so added a ViewPager with scrollables containing a transparent placeholder on top
- *
+ * <p>
  * When scroll, animate the MaterialViewPager Header (toolbar, logo, color ...)
  */
 public class MaterialViewPagerAnimator {
 
     private static final String TAG = MaterialViewPagerAnimator.class.getSimpleName();
+
+    public static final float PAGER_TAB_STRIP_SIDE_MARGIN_DELAY = 0.7f;
 
     public static Boolean ENABLE_LOG = true;
 
@@ -157,7 +158,7 @@ public class MaterialViewPagerAnimator {
     public boolean onMaterialScrolled(Object source, float yOffset) {
 
         if(initialDistance == -1 || initialDistance == 0) {
-            initialDistance = mHeader.mPagerSlidingTabStrip.getTop() - mHeader.toolbar.getBottom();
+            initialDistance = getTabStripMotionSpace() - mHeader.toolbar.getBottom();
         }
 
         //only if yOffset changed
@@ -193,7 +194,7 @@ public class MaterialViewPagerAnimator {
 
         if(percent != 0) {
             //distance between pager & toolbar
-            float newDistance = ViewHelper.getY(mHeader.mPagerSlidingTabStrip) - mHeader.toolbar.getBottom();
+            float newDistance = ViewHelper.getY(mHeader.mPagerSlidingTabStrip) - mHeader.toolbar.getBottom() + getTabStripHeightIfGlue();
 
             percent = 1 - newDistance / initialDistance;
 
@@ -226,6 +227,13 @@ public class MaterialViewPagerAnimator {
                 }
             }
 
+            if (settings.glueHeader) {
+                ViewGroup.MarginLayoutParams params = (ViewGroup.MarginLayoutParams) mHeader.mPagerSlidingTabStrip.getLayoutParams();
+                int v = (int) (getTabStripHeightIfGlue() * Math.max(percent - PAGER_TAB_STRIP_SIDE_MARGIN_DELAY, 0) / (1 - PAGER_TAB_STRIP_SIDE_MARGIN_DELAY));
+                params.leftMargin = v;
+                params.rightMargin = v;
+            }
+
             lastPercent = percent; //save the percent
 
             if (mHeader.mPagerSlidingTabStrip != null) { //move the viewpager indicator
@@ -241,8 +249,8 @@ public class MaterialViewPagerAnimator {
                     ViewHelper.setTranslationY(mHeader.toolbarLayoutBackground, scrollTop);
 
                     //when
-                    if (ViewHelper.getY(mHeader.mPagerSlidingTabStrip) < mHeader.getToolbar().getBottom()) {
-                        float ty = mHeader.getToolbar().getBottom() - mHeader.mPagerSlidingTabStrip.getTop();
+                    if (ViewHelper.getY(mHeader.mPagerSlidingTabStrip) < mHeader.getToolbar().getBottom() - getTabStripHeightIfGlue()) {
+                        float ty = mHeader.getToolbar().getBottom() - getTabStripMotionSpace();
                         ViewHelper.setTranslationY(mHeader.mPagerSlidingTabStrip, ty);
                         ViewHelper.setTranslationY(mHeader.toolbarLayoutBackground, ty);
                     }
@@ -325,25 +333,35 @@ public class MaterialViewPagerAnimator {
      * @param duration the transition color animation duration
      */
     public void setColor(int color, int duration) {
-        ValueAnimator colorAnim = ObjectAnimator.ofInt(mHeader.headerBackground, "backgroundColor", settings.color, color);
-        colorAnim.setEvaluator(new ArgbEvaluator());
-        colorAnim.setDuration(duration);
-        colorAnim.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
-            @Override
-            public void onAnimationUpdate(ValueAnimator animation) {
-                final int animatedValue = (Integer) animation.getAnimatedValue();
-                int colorAlpha = colorWithAlpha(animatedValue, lastPercent);
-                mHeader.headerBackground.setBackgroundColor(colorAlpha);
-                mHeader.statusBackground.setBackgroundColor(colorAlpha);
-                mHeader.toolbar.setBackgroundColor(colorAlpha);
-                mHeader.toolbarLayoutBackground.setBackgroundColor(colorAlpha);
-                mHeader.mPagerSlidingTabStrip.setBackgroundColor(colorAlpha);
 
-                //set the new color as MaterialViewPager's color
-                settings.color = animatedValue;
-            }
-        });
-        colorAnim.start();
+//            ValueAnimator colorAnim = ObjectAnimator.ofInt(mHeader.headerBackground, "backgroundColor", settings.color, color);
+//            colorAnim.setEvaluator(new ArgbEvaluator());
+//            colorAnim.setDuration(duration);
+//            colorAnim.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+//                @Override
+//                public void onAnimationUpdate(ValueAnimator animation) {
+//                    final int animatedValue = (Integer) animation.getAnimatedValue();
+//                    int colorAlpha = colorWithAlpha(animatedValue, lastPercent);
+//                    mHeader.headerBackground.setBackgroundColor(colorAlpha);
+//                    mHeader.statusBackground.setBackgroundColor(colorAlpha);
+//                    mHeader.toolbar.setBackgroundColor(colorAlpha);
+//                    mHeader.toolbarLayoutBackground.setBackgroundColor(colorAlpha);
+//                    mHeader.mPagerSlidingTabStrip.setBackgroundColor(colorAlpha);
+//
+//                    //set the new color as MaterialViewPager's color
+//                    settings.color = animatedValue;
+//                }
+//            });
+
+            int colorAlpha = color;
+            mHeader.headerBackground.setBackgroundColor(colorAlpha);
+            mHeader.statusBackground.setBackgroundColor(colorAlpha);
+            mHeader.toolbar.setBackgroundColor(colorAlpha);
+            mHeader.toolbarLayoutBackground.setBackgroundColor(colorAlpha);
+            mHeader.mPagerSlidingTabStrip.setBackgroundColor(colorAlpha);
+            settings.color = color;
+            setColorPercent(lastPercent);
+
     }
 
     public void animateColorPercent(float percent, int duration) {
@@ -394,7 +412,18 @@ public class MaterialViewPagerAnimator {
     }
 
     private boolean toolbarJoinsTabs() {
-        return (mHeader.toolbar.getBottom() == mHeader.mPagerSlidingTabStrip.getTop() + ViewHelper.getTranslationY(mHeader.mPagerSlidingTabStrip));
+        return (mHeader.toolbar.getBottom() == getTabStripMotionSpace() + ViewHelper.getTranslationY(mHeader.mPagerSlidingTabStrip));
+    }
+
+    private int getTabStripMotionSpace() {
+        return mHeader.mPagerSlidingTabStrip.getTop() + getTabStripHeightIfGlue();
+    }
+
+    private int getTabStripHeightIfGlue() {
+        if (settings.glueHeader && mHeader.mPagerSlidingTabStrip != null) {
+            return mHeader.mPagerSlidingTabStrip.getHeight();
+        }
+        return 0;
     }
 
     /**
@@ -410,7 +439,7 @@ public class MaterialViewPagerAnimator {
                 firstScrollValue = yOffset;
 
             float translationY = firstScrollValue - yOffset;
-            
+
             if(translationY > 0) {
                 translationY = 0;
             }
@@ -520,6 +549,11 @@ public class MaterialViewPagerAnimator {
                     int yOffset = yOffsets.get(recyclerView);
 
                     yOffset += dy;
+
+                    if (yOffset < 0) {
+                        yOffset = 0;
+                    }
+
                     yOffsets.put(recyclerView, yOffset); //save the new offset
 
                     //first time you get 0, don't share it to others scrolls
