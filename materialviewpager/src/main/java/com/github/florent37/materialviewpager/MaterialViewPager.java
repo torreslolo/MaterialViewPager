@@ -7,6 +7,7 @@ import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.support.annotation.NonNull;
 import android.support.v4.view.ViewPager;
 import android.support.v7.widget.Toolbar;
 import android.util.AttributeSet;
@@ -20,16 +21,17 @@ import android.widget.RelativeLayout;
 import com.astuetz.PagerSlidingTabStrip;
 import com.github.florent37.materialviewpager.header.HeaderDesign;
 import com.github.florent37.materialviewpager.header.HeadersKeeper;
+import com.github.florent37.materialviewpager.header.ImagesPagerAdapter;
 import com.github.florent37.materialviewpager.header.MaterialViewPagerImageHelper;
 import com.nineoldandroids.view.ViewHelper;
 import com.ogaclejapan.smarttablayout.SmartTabLayout;
 
 /**
  * Created by florentchampigny on 28/04/15.
- * <p/>
+ * <p>
  * The main class of MaterialViewPager
  * To use in an xml layout with attributes viewpager_*
- * <p/>
+ * <p>
  * Display a preview with header, actual logo and fake cells
  */
 public class MaterialViewPager extends FrameLayout implements ViewPager.OnPageChangeListener {
@@ -82,6 +84,8 @@ public class MaterialViewPager extends FrameLayout implements ViewPager.OnPageCh
     protected MaterialViewPagerSettings settings = new MaterialViewPagerSettings();
 
     protected HeadersKeeper mHeadersKeeper;
+
+    private ViewPager mPagerHeader;
 
     //region construct
 
@@ -153,7 +157,10 @@ public class MaterialViewPager extends FrameLayout implements ViewPager.OnPageCh
                 else
                     headerId = R.layout.material_view_pager_imageview_header;
             }
-            headerBackgroundContainer.addView(LayoutInflater.from(getContext()).inflate(headerId, headerBackgroundContainer, false));
+            View headerView = LayoutInflater.from(getContext()).inflate(headerId, headerBackgroundContainer, false);
+            findPagerHeader(headerView);
+
+            headerBackgroundContainer.addView(headerView);
         }
 
 
@@ -204,6 +211,14 @@ public class MaterialViewPager extends FrameLayout implements ViewPager.OnPageCh
 
             addView(sample);
         }
+    }
+
+    private void findPagerHeader(View headerView) {
+        View pagerHeader = headerView.findViewById(R.id.materialviewpager_pagerHeader);
+        if (ViewPager.class.isInstance(pagerHeader)) {
+            mPagerHeader = (ViewPager) pagerHeader;
+        }
+
     }
 
     private void initialiseHeights() {
@@ -377,6 +392,12 @@ public class MaterialViewPager extends FrameLayout implements ViewPager.OnPageCh
 
     @Override
     public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+
+        if (mPagerHeader != null) {
+            int scrollX = mViewPager.getScrollX();
+            mPagerHeader.setScrollX(scrollX);
+        }
+
         // TODO Page Scroll, change header color
         if (positionOffset >= 0.5) {
             onPageSelected(position + 1);
@@ -405,12 +426,14 @@ public class MaterialViewPager extends FrameLayout implements ViewPager.OnPageCh
         if (headerDesign == null)
             return;
 
-        int fadeDuration = 400;
+        if (mPagerHeader == null) {
+            int fadeDuration = 400;
 
-        if (headerDesign.getDrawable() != null) {
-            setImageDrawable(headerDesign.getDrawable(), fadeDuration);
-        } else {
-            setImageUrl(headerDesign.getImageUrl(), fadeDuration);
+            if (headerDesign.getDrawable() != null) {
+                setImageDrawable(headerDesign.getDrawable(), fadeDuration);
+            } else {
+                setImageUrl(headerDesign.getImageUrl(), fadeDuration);
+            }
         }
 
 
@@ -460,7 +483,11 @@ public class MaterialViewPager extends FrameLayout implements ViewPager.OnPageCh
                 };
     }
 
-    public void setMaterialViewHeadersKeeper(HeadersKeeper headersKeeper) {
+    public void setMaterialViewHeadersKeeper(@NonNull HeadersKeeper headersKeeper) {
+        if (mPagerHeader != null) {
+            mPagerHeader.setAdapter(new ImagesPagerAdapter(getContext(), headersKeeper));
+            mPagerHeader.setOffscreenPageLimit(headersKeeper.size());
+        }
         mHeadersKeeper = headersKeeper;
     }
 

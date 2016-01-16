@@ -27,4 +27,7 @@ public abstract class HeadersKeeper extends Utils {
     }
 
 
+    public int size() {
+        return mHeaders.size();
+    }
 }
