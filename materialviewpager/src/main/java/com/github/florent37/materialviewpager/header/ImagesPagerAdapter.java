@@ -2,6 +2,7 @@ package com.github.florent37.materialviewpager.header;
 
 import android.content.Context;
 import android.support.v4.view.PagerAdapter;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -41,9 +42,14 @@ public class ImagesPagerAdapter extends PagerAdapter {
 //        imageView.setImageResource(mImageList.get(position));
         container.addView(itemView);
 
-        Picasso.with(container.getContext())
-                .load(mHeadersKeeper.getHeaderDesign(position).getImageUrl())
-                .into(imageView);
+        String imageUrl = mHeadersKeeper.getHeaderDesign(position).getImageUrl();
+        if (TextUtils.isEmpty(imageUrl)) {
+            imageView.setImageResource(R.drawable.psts_background_tab);
+        } else {
+            Picasso.with(container.getContext())
+                    .load(imageUrl)
+                    .into(imageView);
+        }
 
         return itemView;
     }

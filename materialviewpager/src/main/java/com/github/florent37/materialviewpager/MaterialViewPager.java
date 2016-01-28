@@ -11,6 +11,7 @@ import android.support.annotation.NonNull;
 import android.support.v4.view.ViewPager;
 import android.support.v7.widget.Toolbar;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -407,7 +408,7 @@ public class MaterialViewPager extends FrameLayout implements ViewPager.OnPageCh
             onPageSelected(position);
         }
 
-        int color = mHeadersKeeper.getColorWithOffset(position,positionOffset);
+        int color = mHeadersKeeper.getColorWithOffset(position, positionOffset);
         setColor(color, 0);
     }
 

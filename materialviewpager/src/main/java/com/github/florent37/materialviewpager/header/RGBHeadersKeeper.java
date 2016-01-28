@@ -21,7 +21,7 @@ public class RGBHeadersKeeper extends HeadersKeeper {
         mRGBDiffs = new LinkedList<>();
 
         for (HeaderDesign design : mHeaders) {
-            mRGBValues.add(Utils.buildRGB(context.getResources().getColor(design.getColorRes())));
+            mRGBValues.add(Utils.buildRGB(design.getColor()));
         }
 
         for (float[] fromColor : mRGBValues) {
