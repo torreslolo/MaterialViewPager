@@ -58,7 +58,7 @@ public class MaterialViewPagerAnimator {
     private MaterialViewPagerHeader mHeader;
 
     //duration of translate header enter animation
-    private static final int ENTER_TOOLBAR_ANIMATION_DURATION = 600;
+    private static final int ENTER_TOOLBAR_ANIMATION_DURATION = 400;
 
     //reference to the current MaterialViewPager
     protected MaterialViewPager materialViewPager;
@@ -228,14 +228,8 @@ public class MaterialViewPagerAnimator {
             }
 
             if (settings.glueHeader) {
-
-
-//                ViewGroup.MarginLayoutParams params = (ViewGroup.MarginLayoutParams) mHeader.mPagerSlidingTabStrip.getLayoutParams();
                 int v = (int) (getTabStripHeightIfGlue() * Math.max(percent - PAGER_TAB_STRIP_SIDE_MARGIN_DELAY, 0) / (1 - PAGER_TAB_STRIP_SIDE_MARGIN_DELAY));
                 mHeader.mPagerSlidingTabStrip.setMaskPadding(v);
-//                params.leftMargin = v;
-//                params.rightMargin = v;
-                // TODO GOSSI{!!!
             }
 
             lastPercent = percent; //save the percent
