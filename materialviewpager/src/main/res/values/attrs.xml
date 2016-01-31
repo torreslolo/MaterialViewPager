@@ -25,6 +25,10 @@
 
     </declare-styleable>
 
+    <declare-styleable name="KenBurnsView">
+        <attr name="transitionDuration" format="integer"/>
+    </declare-styleable>
+
     <declare-styleable name="MaskableLayout">
         <attr name="maskLength" format="dimension"/>
         <attr name="porterduffxfermode">
