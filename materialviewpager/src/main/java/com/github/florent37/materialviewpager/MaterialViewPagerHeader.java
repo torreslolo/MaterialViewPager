@@ -3,8 +3,10 @@ package com.github.florent37.materialviewpager;
 import android.content.Context;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 
+import com.github.florent37.materialviewpager.views.MaskableFrameLayout;
 import com.nineoldandroids.view.ViewHelper;
 
 import static com.github.florent37.materialviewpager.Utils.dpToPx;
@@ -19,7 +21,7 @@ public class MaterialViewPagerHeader {
 
     protected View toolbarLayout;
     protected Toolbar toolbar;
-    protected View mPagerSlidingTabStrip;
+    protected MaskableFrameLayout mPagerSlidingTabStrip;
 
     protected View toolbarLayoutBackground;
     protected View headerBackground;
@@ -53,7 +55,7 @@ public class MaterialViewPagerHeader {
         return context;
     }
 
-    public MaterialViewPagerHeader withPagerSlidingTabStrip(View pagerSlidingTabStrip) {
+    public MaterialViewPagerHeader withPagerSlidingTabStrip(MaskableFrameLayout pagerSlidingTabStrip) {
         this.mPagerSlidingTabStrip = pagerSlidingTabStrip;
 
         mPagerSlidingTabStrip.getViewTreeObserver().addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
@@ -73,6 +75,7 @@ public class MaterialViewPagerHeader {
         this.headerBackground = headerBackground;
         return this;
     }
+
 
     public MaterialViewPagerHeader withStatusBackground(View statusBackground) {
         this.statusBackground = statusBackground;
@@ -101,7 +104,7 @@ public class MaterialViewPagerHeader {
             @Override
             public boolean onPreDraw() {
                 //rotation fix, if not set, originalTitleY = Na
-                ViewHelper.setTranslationY(mLogo,0);
+                ViewHelper.setTranslationY(mLogo, 0);
                 ViewHelper.setTranslationX(mLogo, 0);
 
                 originalTitleY = ViewHelper.getY(mLogo);

@@ -11,7 +11,6 @@ import android.support.annotation.NonNull;
 import android.support.v4.view.ViewPager;
 import android.support.v7.widget.Toolbar;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -24,6 +23,7 @@ import com.github.florent37.materialviewpager.header.HeaderDesign;
 import com.github.florent37.materialviewpager.header.HeadersKeeper;
 import com.github.florent37.materialviewpager.header.ImagesPagerAdapter;
 import com.github.florent37.materialviewpager.header.MaterialViewPagerImageHelper;
+import com.github.florent37.materialviewpager.views.MaskableFrameLayout;
 import com.nineoldandroids.view.ViewHelper;
 import com.ogaclejapan.smarttablayout.SmartTabLayout;
 
@@ -192,7 +192,7 @@ public class MaterialViewPager extends FrameLayout implements ViewPager.OnPageCh
             materialViewPagerHeader = MaterialViewPagerHeader
                     .withToolbar(mToolbar)
                     .withToolbarLayoutBackground(toolbarLayoutBackground)
-                    .withPagerSlidingTabStrip(pagerTitleStripContainer)
+                    .withPagerSlidingTabStrip((MaskableFrameLayout) pagerTitleStripContainer)
                     .withHeaderBackground(headerBackground)
                     .withStatusBackground(findViewById(R.id.statusBackground))
                     .withLogo(logoContainer);

@@ -228,10 +228,14 @@ public class MaterialViewPagerAnimator {
             }
 
             if (settings.glueHeader) {
-                ViewGroup.MarginLayoutParams params = (ViewGroup.MarginLayoutParams) mHeader.mPagerSlidingTabStrip.getLayoutParams();
+
+
+//                ViewGroup.MarginLayoutParams params = (ViewGroup.MarginLayoutParams) mHeader.mPagerSlidingTabStrip.getLayoutParams();
                 int v = (int) (getTabStripHeightIfGlue() * Math.max(percent - PAGER_TAB_STRIP_SIDE_MARGIN_DELAY, 0) / (1 - PAGER_TAB_STRIP_SIDE_MARGIN_DELAY));
-                params.leftMargin = v;
-                params.rightMargin = v;
+                mHeader.mPagerSlidingTabStrip.setMaskPadding(v);
+//                params.leftMargin = v;
+//                params.rightMargin = v;
+                // TODO GOSSI{!!!
             }
 
             lastPercent = percent; //save the percent
