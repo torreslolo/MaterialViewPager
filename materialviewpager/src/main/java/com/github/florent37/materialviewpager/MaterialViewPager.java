@@ -87,6 +87,7 @@ public class MaterialViewPager extends FrameLayout implements ViewPager.OnPageCh
     protected HeadersKeeper mHeadersKeeper;
 
     private ViewPager mPagerHeader;
+    private OnColorChangedListener mColorListener;
 
     //region construct
 
@@ -108,6 +109,10 @@ public class MaterialViewPager extends FrameLayout implements ViewPager.OnPageCh
     public MaterialViewPager(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
         settings.handleAttributes(context, attrs);
+    }
+
+    public void setOnColorChangedListener(OnColorChangedListener mColorListener) {
+        this.mColorListener = mColorListener;
     }
 
     //endregion
@@ -409,6 +414,11 @@ public class MaterialViewPager extends FrameLayout implements ViewPager.OnPageCh
         }
 
         int color = mHeadersKeeper.getColorWithOffset(position, positionOffset);
+
+        if (mColorListener != null) {
+            mColorListener.onColorChanged(color);
+        }
+
         setColor(color, 0);
     }
 
@@ -496,4 +506,7 @@ public class MaterialViewPager extends FrameLayout implements ViewPager.OnPageCh
         void OnImageLoad(ImageView imageView, Bitmap bitmap);
     }
 
+    public interface OnColorChangedListener {
+        void onColorChanged(int color);
+    }
 }
