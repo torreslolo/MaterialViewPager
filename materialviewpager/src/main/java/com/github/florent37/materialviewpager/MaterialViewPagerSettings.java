@@ -30,6 +30,7 @@ public class MaterialViewPagerSettings implements Parcelable {
     protected int headerHeight;
     protected int headerHeightPx;
     protected int color;
+    protected float minColorPercent;
 
     protected float headerAlpha;
     protected float parallaxHeaderFactor;
@@ -71,6 +72,7 @@ public class MaterialViewPagerSettings implements Parcelable {
             }
             {
                 color = styledAttrs.getColor(R.styleable.MaterialViewPager_viewpager_color, 0);
+                minColorPercent = styledAttrs.getFloat(R.styleable.MaterialViewPager_viewpager_minColorPercent, 0f);
             }
             {
                 headerHeightPx = styledAttrs.getDimensionPixelOffset(R.styleable.MaterialViewPager_viewpager_headerHeight, 200);

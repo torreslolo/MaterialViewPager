@@ -157,7 +157,7 @@ public class MaterialViewPagerAnimator {
      */
     public boolean onMaterialScrolled(Object source, float yOffset) {
 
-        if(initialDistance == -1 || initialDistance == 0) {
+        if (initialDistance == -1 || initialDistance == 0) {
             initialDistance = getTabStripMotionSpace() - mHeader.toolbar.getBottom();
         }
 
@@ -192,7 +192,7 @@ public class MaterialViewPagerAnimator {
         if (ENABLE_LOG)
             Log.d("percent1", "" + percent);
 
-        if(percent != 0) {
+        if (percent != 0) {
             //distance between pager & toolbar
             float newDistance = ViewHelper.getY(mHeader.mPagerSlidingTabStrip) - mHeader.toolbar.getBottom() + getTabStripHeightIfGlue();
 
@@ -202,13 +202,13 @@ public class MaterialViewPagerAnimator {
                 Log.d("percent2", "" + percent);
         }
 
-        if(Float.isNaN(percent)) //fix for orientation change
+        if (Float.isNaN(percent)) //fix for orientation change
             return false;
 
         //fix quick scroll
-        if(percent == 0 && headerAnimator != null) {
+        if (percent == 0 && headerAnimator != null) {
             cancelHeaderAnimator();
-            ViewHelper.setTranslationY(mHeader.toolbarLayout,0);
+            ViewHelper.setTranslationY(mHeader.toolbarLayout, 0);
         }
 
         percent = minMax(0, percent, 1);
@@ -297,8 +297,8 @@ public class MaterialViewPagerAnimator {
         return true;
     }
 
-    private  void cancelHeaderAnimator(){
-        if(headerAnimator != null) {
+    private void cancelHeaderAnimator() {
+        if (headerAnimator != null) {
             if (headerAnimator instanceof ObjectAnimator)
                 ((ObjectAnimator) headerAnimator).cancel();
             else if (headerAnimator instanceof android.animation.ObjectAnimator)
@@ -357,14 +357,14 @@ public class MaterialViewPagerAnimator {
 //                }
 //            });
 
-            int colorAlpha = color;
-            mHeader.headerBackground.setBackgroundColor(colorAlpha);
-            mHeader.statusBackground.setBackgroundColor(colorAlpha);
-            mHeader.toolbar.setBackgroundColor(colorAlpha);
-            mHeader.toolbarLayoutBackground.setBackgroundColor(colorAlpha);
-            mHeader.mPagerSlidingTabStrip.setBackgroundColor(colorAlpha);
-            settings.color = color;
-            setColorPercent(lastPercent);
+        int colorAlpha = color;
+        mHeader.headerBackground.setBackgroundColor(colorAlpha);
+        mHeader.statusBackground.setBackgroundColor(colorAlpha);
+        mHeader.toolbar.setBackgroundColor(colorAlpha);
+        mHeader.toolbarLayoutBackground.setBackgroundColor(colorAlpha);
+        mHeader.mPagerSlidingTabStrip.setBackgroundColor(colorAlpha);
+        settings.color = color;
+        setColorPercent(lastPercent);
 
     }
 
@@ -383,6 +383,8 @@ public class MaterialViewPagerAnimator {
     public void setColorPercent(float percent) {
         // change color of
         // toolbar & viewpager indicator &  statusBaground
+
+        percent = percent * (1 - settings.minColorPercent) + settings.minColorPercent;
 
         setBackgroundColor(
                 colorWithAlpha(this.settings.color, percent),
@@ -444,7 +446,7 @@ public class MaterialViewPagerAnimator {
 
             float translationY = firstScrollValue - yOffset;
 
-            if(translationY > 0) {
+            if (translationY > 0) {
                 translationY = 0;
             }
 
@@ -683,11 +685,11 @@ public class MaterialViewPagerAnimator {
         new Handler(Looper.getMainLooper()).postDelayed(new Runnable() {
             @Override
             public void run() {
-                if(!onMaterialScrolled(null, scroll)){
-                    restoreScroll(scroll,settings);
+                if (!onMaterialScrolled(null, scroll)) {
+                    restoreScroll(scroll, settings);
                 }
             }
-        },100);
+        }, 100);
 
     }
 
