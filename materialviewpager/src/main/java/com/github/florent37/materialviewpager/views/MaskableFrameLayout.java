@@ -10,8 +10,8 @@ import android.graphics.LinearGradient;
 import android.graphics.Paint;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
+import android.graphics.Rect;
 import android.graphics.Shader;
-import android.graphics.drawable.AnimationDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.PaintDrawable;
 import android.graphics.drawable.ShapeDrawable;
@@ -37,6 +37,26 @@ public class MaskableFrameLayout extends FrameLayout {
 
     private int mMaskLength;
     private int mMaskPadding = 0;
+
+    ShapeDrawable.ShaderFactory leftShader = new ShapeDrawable.ShaderFactory() {
+        @Override
+        public Shader resize(int width, int height) {
+            return new LinearGradient(0, 0, mMaskLength, 0,
+                    new int[]{Color.TRANSPARENT, Color.BLACK},
+                    new float[]{0, 1},
+                    Shader.TileMode.CLAMP);
+        }
+    };
+
+    ShapeDrawable.ShaderFactory rightShader = new ShapeDrawable.ShaderFactory() {
+        @Override
+        public Shader resize(int width, int height) {
+            return new LinearGradient(0, 0, mMaskLength, 0,
+                    new int[]{Color.BLACK, Color.TRANSPARENT},
+                    new float[]{0, 1},
+                    Shader.TileMode.CLAMP);
+        }
+    };
 
     public int dpToPx(int dp) {
         DisplayMetrics displayMetrics = getContext().getResources().getDisplayMetrics();
@@ -77,9 +97,18 @@ public class MaskableFrameLayout extends FrameLayout {
 
     //Mask props
     @Nullable
-    private Drawable mDrawableMask = null;
+    private Drawable mLeftDrawableMask = null;
     @Nullable
-    private Bitmap mFinalMask = null;
+    private Drawable mRightDrawableMask = null;
+    @Nullable
+    private Drawable mPaddingDrawablwMask = null;
+
+    @Nullable
+    private Bitmap mFinalPaddingMask = null;
+    @Nullable
+    private Bitmap mFinalLeftMask = null;
+    @Nullable
+    private Bitmap mFinalRightMask = null;
 
     //Drawing props
     private Paint mPaint = null;
@@ -116,12 +145,11 @@ public class MaskableFrameLayout extends FrameLayout {
                 //Load the mask if specified in xml
                 mMaskLength = a.getDimensionPixelOffset(R.styleable.MaskableLayout_maskLength, 0);
 
-                initMask(loadMask());
+                initMasks();
                 //Load the mode if specified in xml
                 mPorterDuffXferMode = getModeFromInteger(
                         a.getInteger(R.styleable.MaskableLayout_porterduffxfermode, 0));
 
-                initMask(mDrawableMask);
             } finally {
                 if (a != null) {
                     a.recycle();
@@ -142,32 +170,38 @@ public class MaskableFrameLayout extends FrameLayout {
 
     //Mask functions
     @Nullable
-    private Drawable loadMask() {
+    private Drawable loadMask(ShapeDrawable.ShaderFactory shader) {
         PaintDrawable p = new PaintDrawable();
         p.setShape(new RectShape());
-        p.setShaderFactory(getShaderFactory());
+        p.setShaderFactory(shader);
+        return p;
+    }
+
+    //Mask functions
+    @Nullable
+    private Drawable loadMask() {
+        ShapeDrawable p = new ShapeDrawable(new RectShape());
+        p.getPaint().setColor(0x00000000);
         return p;
     }
 
     public void setMaskPadding(int maskPadding) {
         mMaskPadding = maskPadding;
-        setMask(loadMask());
+        invalidate();
     }
 
-    private void initMask(@Nullable Drawable input) {
-        if (input != null) {
-            mDrawableMask = input;
-            if (mDrawableMask instanceof AnimationDrawable) {
-                mDrawableMask.setCallback(this);
-            }
+    private void initMasks() {
+        Drawable leftDrawable = loadMask(leftShader);
+        Drawable rightDrawable = loadMask(rightShader);
+        Drawable paddingDrawable = loadMask();
+
+        if (leftDrawable != null && rightDrawable != null && paddingDrawable != null) {
+            mLeftDrawableMask = leftDrawable;
+            mRightDrawableMask = rightDrawable;
+            mPaddingDrawablwMask = paddingDrawable;
         } else {
             log("Are you sure you don't want to provide a mask ?");
         }
-    }
-
-    @Nullable
-    public Drawable getDrawableMask() {
-        return mDrawableMask;
     }
 
     @Nullable
@@ -191,21 +225,6 @@ public class MaskableFrameLayout extends FrameLayout {
         return null;
     }
 
-    public void setMask(int drawableRes) {
-        Resources res = getResources();
-        if (res != null) {
-            setMask(res.getDrawable(drawableRes));
-        } else {
-            log("Unable to load resources, mask will not be loaded as drawable");
-        }
-    }
-
-    public void setMask(@Nullable Drawable input) {
-        initMask(input);
-        swapBitmapMask(makeBitmapMask(mDrawableMask));
-        invalidate();
-    }
-
     //Once the size has changed we need to remake the mask.
     @Override
     protected void onSizeChanged(int w, int h, int oldw, int oldh) {
@@ -215,9 +234,9 @@ public class MaskableFrameLayout extends FrameLayout {
 
     private void setSize(int width, int height) {
         if (width > 0 && height > 0) {
-            if (mDrawableMask != null) {
+            if (mLeftDrawableMask != null) {
                 //Remake the 9patch
-                swapBitmapMask(makeBitmapMask(mDrawableMask));
+                swapBitmapMask();
             }
         } else {
             log("Width and height must be higher than 0");
@@ -228,9 +247,12 @@ public class MaskableFrameLayout extends FrameLayout {
     @Override
     protected void dispatchDraw(Canvas canvas) {
         super.dispatchDraw(canvas);
-        if (mFinalMask != null && mPaint != null) {
+        if (mFinalLeftMask != null && mPaint != null) {
             mPaint.setXfermode(mPorterDuffXferMode);
-            canvas.drawBitmap(mFinalMask, 0.0f, 0.0f, mPaint);
+            Rect r = new Rect(0, 0, mMaskPadding + 1, canvas.getHeight());
+            canvas.drawBitmap(mFinalPaddingMask, null, r, mPaint);
+            canvas.drawBitmap(mFinalLeftMask, mMaskPadding, 0.0f, mPaint);
+            canvas.drawBitmap(mFinalRightMask, canvas.getWidth() - mMaskPadding - mMaskLength, 0.0f, mPaint);
             mPaint.setXfermode(null);
         } else {
             log("Mask or paint is null ...");
@@ -257,7 +279,7 @@ public class MaskableFrameLayout extends FrameLayout {
                     } else {
                         log("GlobalLayoutListener not removed as ViewTreeObserver is not valid");
                     }
-                    swapBitmapMask(makeBitmapMask(mDrawableMask));
+                    swapBitmapMask();
                 }
             });
         }
@@ -265,15 +287,15 @@ public class MaskableFrameLayout extends FrameLayout {
 
     //Logging
     private void log(@NonNull String message) {
-        Log.d(TAG, message);
+//        Log.d(TAG, message);
     }
 
     //Animation
     @Override
     public void invalidateDrawable(Drawable dr) {
         if (dr != null) {
-            initMask(dr);
-            swapBitmapMask(makeBitmapMask(dr));
+//            initMasks();
+//            swapBitmapMask();
             invalidate();
         }
     }
@@ -292,13 +314,33 @@ public class MaskableFrameLayout extends FrameLayout {
         }
     }
 
-    private void swapBitmapMask(@Nullable Bitmap newMask) {
-        if (newMask != null) {
-            if (mFinalMask != null && !mFinalMask.isRecycled()) {
-                mFinalMask.recycle();
+    private void swapBitmapMask() {
+        Bitmap newLeftMask = makeBitmapMask(mLeftDrawableMask);
+        Bitmap newRightMask = makeBitmapMask(mRightDrawableMask);
+        Bitmap newPaddingMask = makeBitmapMask(mPaddingDrawablwMask);
+
+
+        if (newLeftMask != null) {
+            if (mFinalLeftMask != null && !mFinalLeftMask.isRecycled()) {
+                mFinalLeftMask.recycle();
             }
-            mFinalMask = newMask;
+            mFinalLeftMask = newLeftMask;
         }
+
+        if (newRightMask != null) {
+            if (mFinalRightMask != null && !mFinalRightMask.isRecycled()) {
+                mFinalRightMask.recycle();
+            }
+            mFinalRightMask = newRightMask;
+        }
+        if (newPaddingMask != null) {
+            if (mFinalPaddingMask != null && !mFinalPaddingMask.isRecycled()) {
+                mFinalPaddingMask.recycle();
+            }
+            mFinalPaddingMask = newPaddingMask;
+        }
+
+
     }
 
     //Utils
@@ -372,28 +414,4 @@ public class MaskableFrameLayout extends FrameLayout {
         return new PorterDuffXfermode(mode);
     }
 
-    public ShapeDrawable.ShaderFactory getShaderFactory() {
-        return new ShapeDrawable.ShaderFactory() {
-            @Override
-            public Shader resize(int width, int height) {
-
-                float percent = ((float) mMaskLength / (float) width);
-                float paddingPercent = ((float) mMaskPadding / (float) width);
-
-
-                return new LinearGradient(0, 0, width, 0,
-                        new int[]{
-                                Color.TRANSPARENT,
-                                Color.TRANSPARENT,
-                                Color.BLACK,
-                                Color.BLACK,
-                                Color.TRANSPARENT,
-                                Color.TRANSPARENT}, //substitute the correct colors for these
-
-                        new float[]{
-                                0, paddingPercent, paddingPercent + percent, 1 - percent - paddingPercent, 1 - paddingPercent, 1},
-                        Shader.TileMode.CLAMP);
-            }
-        };
-    }
 }
