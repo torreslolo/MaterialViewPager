@@ -49,8 +49,9 @@ public class MaterialViewPagerAnimator {
     private static final String TAG = MaterialViewPagerAnimator.class.getSimpleName();
 
     public static final float PAGER_TAB_STRIP_SIDE_MARGIN_DELAY = 0.7f;
+    public static final String TRANSLATION_Y = "translationY";
 
-    public static Boolean ENABLE_LOG = true;
+    public static Boolean ENABLE_LOG = false;
 
     private Context context;
 
@@ -472,7 +473,7 @@ public class MaterialViewPagerAnimator {
 
         if (headerAnimator == null) {
             if (android.os.Build.VERSION.SDK_INT > Build.VERSION_CODES.GINGERBREAD_MR1) {
-                headerAnimator = android.animation.ObjectAnimator.ofFloat(mHeader.toolbarLayout, "translationY", 0).setDuration(ENTER_TOOLBAR_ANIMATION_DURATION);
+                headerAnimator = android.animation.ObjectAnimator.ofFloat(mHeader.toolbarLayout, TRANSLATION_Y, 0).setDuration(ENTER_TOOLBAR_ANIMATION_DURATION);
                 ((android.animation.ObjectAnimator) headerAnimator).addListener(new android.animation.AnimatorListenerAdapter() {
                     @Override
                     public void onAnimationEnd(android.animation.Animator animation) {
@@ -484,7 +485,7 @@ public class MaterialViewPagerAnimator {
                 });
                 ((android.animation.ObjectAnimator) headerAnimator).start();
             } else {
-                headerAnimator = ObjectAnimator.ofFloat(mHeader.toolbarLayout, "translationY", 0).setDuration(ENTER_TOOLBAR_ANIMATION_DURATION);
+                headerAnimator = ObjectAnimator.ofFloat(mHeader.toolbarLayout,TRANSLATION_Y, 0).setDuration(ENTER_TOOLBAR_ANIMATION_DURATION);
                 ((ObjectAnimator) headerAnimator).addListener(new AnimatorListenerAdapter() {
                     @Override
                     public void onAnimationEnd(Animator animation) {
@@ -690,10 +691,11 @@ public class MaterialViewPagerAnimator {
     public void onViewPagerPageChanged() {
         scrollDown(lastYOffset);
 
-        View visibleView = getTheVisibileView(scrollViewList);
-        if (!canScroll(visibleView)) {
-            followScrollToolbarLayout(0);
-            onMaterialScrolled(visibleView, 0);
-        }
+// // TODO: 02.02.16 Maybe uncomment? But it's pretty good for performance!
+//        View visibleView = getTheVisibileView(scrollViewList);
+//        if (!canScroll(visibleView)) {
+//            followScrollToolbarLayout(0);
+//            onMaterialScrolled(visibleView, 0);
+//        }
     }
 }
