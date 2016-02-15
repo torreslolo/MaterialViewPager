@@ -22,7 +22,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
-import android.util.Log;
+import android.view.MotionEvent;
 import android.view.ViewTreeObserver;
 import android.widget.FrameLayout;
 
@@ -69,7 +69,6 @@ public class MaskableFrameLayout extends FrameLayout {
         int dp = Math.round(px / (displayMetrics.xdpi / DisplayMetrics.DENSITY_DEFAULT));
         return dp;
     }
-
 
     //Constants
     private static final String TAG = "MaskableFrameLayout";
@@ -202,6 +201,13 @@ public class MaskableFrameLayout extends FrameLayout {
         } else {
             log("Are you sure you don't want to provide a mask ?");
         }
+    }
+
+    @Override
+    public boolean onInterceptTouchEvent(MotionEvent ev) {
+        float x = ev.getX();
+        int max = getWidth() - mMaskPadding;
+        return (x < mMaskPadding || x > max || super.onInterceptTouchEvent(ev));
     }
 
     @Nullable
