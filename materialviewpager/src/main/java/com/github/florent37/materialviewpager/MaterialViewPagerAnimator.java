@@ -5,7 +5,6 @@ import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 
@@ -23,10 +22,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-import static com.github.florent37.materialviewpager.Utils.canScroll;
 import static com.github.florent37.materialviewpager.Utils.colorWithAlpha;
 import static com.github.florent37.materialviewpager.Utils.dpToPx;
-import static com.github.florent37.materialviewpager.Utils.getTheVisibileView;
 import static com.github.florent37.materialviewpager.Utils.minMax;
 import static com.github.florent37.materialviewpager.Utils.scrollTo;
 import static com.github.florent37.materialviewpager.Utils.setBackgroundColor;
@@ -485,7 +482,7 @@ public class MaterialViewPagerAnimator {
                 });
                 ((android.animation.ObjectAnimator) headerAnimator).start();
             } else {
-                headerAnimator = ObjectAnimator.ofFloat(mHeader.toolbarLayout,TRANSLATION_Y, 0).setDuration(ENTER_TOOLBAR_ANIMATION_DURATION);
+                headerAnimator = ObjectAnimator.ofFloat(mHeader.toolbarLayout, TRANSLATION_Y, 0).setDuration(ENTER_TOOLBAR_ANIMATION_DURATION);
                 ((ObjectAnimator) headerAnimator).addListener(new AnimatorListenerAdapter() {
                     @Override
                     public void onAnimationEnd(Animator animation) {
@@ -523,7 +520,7 @@ public class MaterialViewPagerAnimator {
      * @param onScrollListener use it if you want to get a callback of the RecyclerView
      */
     public void registerRecyclerView(final RecyclerView recyclerView, final RecyclerView.OnScrollListener onScrollListener) {
-        if (recyclerView != null) {
+        if (recyclerView != null && !scrollViewList.contains(recyclerView)) {
             scrollViewList.add(recyclerView); //add to the scrollable list
             yOffsets.put(recyclerView, recyclerView.getScrollY()); //save the initial recyclerview's yOffset (0) into hashmap
             //only necessary for recyclerview
@@ -568,6 +565,7 @@ public class MaterialViewPagerAnimator {
                         onMaterialScrolled(recyclerView, yOffset);
                 }
             });
+
 
             recyclerView.post(new Runnable() {
                 @Override
