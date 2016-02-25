@@ -4,6 +4,7 @@ import android.content.Context;
 import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
+import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.View;
@@ -29,7 +30,6 @@ import static com.github.florent37.materialviewpager.Utils.minMax;
 import static com.github.florent37.materialviewpager.Utils.scrollTo;
 import static com.github.florent37.materialviewpager.Utils.setBackgroundColor;
 import static com.github.florent37.materialviewpager.Utils.setElevation;
-import static com.github.florent37.materialviewpager.Utils.setScale;
 
 /**
  * Created by florentchampigny on 24/04/15.
@@ -533,32 +533,68 @@ public class MaterialViewPagerAnimator {
                         onScrollListener.onScrollStateChanged(recyclerView, newState);
                 }
 
+
+                int previous = 0;
+                int prevPos = 0;
+
                 @Override
                 public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
                     super.onScrolled(recyclerView, dx, dy);
+
+                    if (dy == 0) {
+                        return;
+                    }
+
+                    LinearLayoutManager layoutManager = (LinearLayoutManager) recyclerView.getLayoutManager();
+                    int pos = layoutManager.findFirstVisibleItemPosition();
+                    View viewByPosition = layoutManager.findViewByPosition(pos);
+                    int posY = viewByPosition.getTop();
+
+                    if (prevPos == pos) {
+                        int dyy = previous - posY;
+//                        Log.d(MaterialViewPagerAnimator.class.getName(), "]-> onScrolled ->delta=" + dyy + " dy=" + dy + " eq=" + (dyy == dy));
+                    }
+
+
+                    prevPos = pos;
+                    previous = posY;
 
                     if (onScrollListener != null)
                         onScrollListener.onScrolled(recyclerView, dx, dy);
 
                     int yOffset = yOffsets.get(recyclerView);
 
-                    yOffset += dy;
+//                    Log.d(MaterialViewPagerAnimator.class.getName(), "]-> onScrolled ->offsets=oOff=" + (yOffset + dy) + " posY=" + (-posY));
 
-                    if (yOffset < 0) {
-                        yOffset = 0;
+                    if (pos == 0) {
+                        yOffset = -posY;
+                    } else {
+                        yOffset += dy;
+
+//                        Log.d(MaterialViewPagerAnimator.class.getName(), "]-> onScrolled ->setOffset=" + yOffset);
+
+                        if (yOffset < 0) {
+                            yOffset = 0;
+                        }
                     }
 
                     yOffsets.put(recyclerView, yOffset); //save the new offset
 
                     //first time you get 0, don't share it to others scrolls
                     if (yOffset == 0 && !firstZeroPassed) {
+//                        Log.d(MaterialViewPagerAnimator.class.getName(), "]-> onScrolled -> first zero is not passed!");
                         firstZeroPassed = true;
                         return;
                     }
+                    firstZeroPassed = true;
 
                     //only if yOffset changed
-                    if (isNewYOffset(yOffset))
+                    if (isNewYOffset(yOffset)) {
+                        Log.d(MaterialViewPagerAnimator.class.getName(), "s)[" + pos + "]dy=" + dy + "-> onScrolled ->" + yOffset);
                         onMaterialScrolled(recyclerView, yOffset);
+                    } else {
+                        Log.d(MaterialViewPagerAnimator.class.getName(), "n)[" + pos + "]dy=" + dy + "-> onScrolled ->" + yOffset);
+                    }
                 }
             });
 
