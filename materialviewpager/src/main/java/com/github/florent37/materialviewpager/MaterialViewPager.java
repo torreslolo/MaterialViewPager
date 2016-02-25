@@ -62,7 +62,7 @@ public class MaterialViewPager extends FrameLayout implements ViewPager.OnPageCh
      * default : empty
      * with viewpager_logo you can set your own layout
      */
-    private ViewGroup logoContainer;
+//    private ViewGroup logoContainer;
 
     /**
      * Contains all references to MatervialViewPager's header views
@@ -135,7 +135,7 @@ public class MaterialViewPager extends FrameLayout implements ViewPager.OnPageCh
         headerBackgroundContainer = (ViewGroup) findViewById(R.id.headerBackgroundContainer);
         pagerTitleStripContainer = (ViewGroup) findViewById(R.id.pagerTitleStripContainer);
         viewpagerContainer = (ViewGroup) findViewById(R.id.viewpager_layout);
-        logoContainer = (ViewGroup) findViewById(R.id.logoContainer);
+//        logoContainer = (ViewGroup) findViewById(R.id.logoContainer);
 
         mToolbar = (Toolbar) findViewById(R.id.toolbar);
         if (settings.disableToolbar)
@@ -178,14 +178,14 @@ public class MaterialViewPager extends FrameLayout implements ViewPager.OnPageCh
             pagerTitleStripContainer.addView(LayoutInflater.from(getContext()).inflate(settings.pagerTitleStripId, pagerTitleStripContainer, false));
         }
 
-        if (settings.logoLayoutId != -1) {
-            logoContainer.addView(LayoutInflater.from(getContext()).inflate(settings.logoLayoutId, logoContainer, false));
-            if (settings.logoMarginTop != 0) {
-                RelativeLayout.LayoutParams layoutParams = (RelativeLayout.LayoutParams) logoContainer.getLayoutParams();
-                layoutParams.setMargins(0, settings.logoMarginTop, 0, 0);
-                logoContainer.setLayoutParams(layoutParams);
-            }
-        }
+//        if (settings.logoLayoutId != -1) {
+//            logoContainer.addView(LayoutInflater.from(getContext()).inflate(settings.logoLayoutId, logoContainer, false));
+//            if (settings.logoMarginTop != 0) {
+//                RelativeLayout.LayoutParams layoutParams = (RelativeLayout.LayoutParams) logoContainer.getLayoutParams();
+//                layoutParams.setMargins(0, settings.logoMarginTop, 0, 0);
+//                logoContainer.setLayoutParams(layoutParams);
+//            }
+//        }
 
         headerBackground = findViewById(R.id.headerBackground);
         toolbarLayoutBackground = findViewById(R.id.toolbar_layout_background);
@@ -199,8 +199,8 @@ public class MaterialViewPager extends FrameLayout implements ViewPager.OnPageCh
                     .withToolbarLayoutBackground(toolbarLayoutBackground)
                     .withPagerSlidingTabStrip((MaskableFrameLayout) pagerTitleStripContainer)
                     .withHeaderBackground(headerBackground)
-                    .withStatusBackground(findViewById(R.id.statusBackground))
-                    .withLogo(logoContainer);
+                    .withStatusBackground(findViewById(R.id.statusBackground));
+//                    .withLogo(logoContainer);
 
             //and construct the MaterialViewPagerAnimator
             //attach it to the activity to enable MaterialViewPagerHeaderView.setMaterialHeight();

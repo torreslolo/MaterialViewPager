@@ -256,19 +256,19 @@ public class MaterialViewPagerAnimator {
             }
 
 
-            if (mHeader.mLogo != null) { //move the header logo to toolbar
-
-                if (this.settings.hideLogoWithFade) {
-                    ViewHelper.setAlpha(mHeader.mLogo, 1 - percent);
-                    ViewHelper.setTranslationY(mHeader.mLogo, (mHeader.finalTitleY - mHeader.originalTitleY) * percent);
-                } else {
-                    ViewHelper.setTranslationY(mHeader.mLogo, (mHeader.finalTitleY - mHeader.originalTitleY) * percent);
-                    ViewHelper.setTranslationX(mHeader.mLogo, (mHeader.finalTitleX - mHeader.originalTitleX) * percent);
-
-                    float scale = (1 - percent) * (1 - mHeader.finalScale) + mHeader.finalScale;
-                    setScale(scale, mHeader.mLogo);
-                }
-            }
+//            if (mHeader.mLogo != null) { //move the header logo to toolbar
+//
+//                if (this.settings.hideLogoWithFade) {
+//                    ViewHelper.setAlpha(mHeader.mLogo, 1 - percent);
+//                    ViewHelper.setTranslationY(mHeader.mLogo, (mHeader.finalTitleY - mHeader.originalTitleY) * percent);
+//                } else {
+//                    ViewHelper.setTranslationY(mHeader.mLogo, (mHeader.finalTitleY - mHeader.originalTitleY) * percent);
+//                    ViewHelper.setTranslationX(mHeader.mLogo, (mHeader.finalTitleX - mHeader.originalTitleX) * percent);
+//
+//                    float scale = (1 - percent) * (1 - mHeader.finalScale) + mHeader.finalScale;
+//                    setScale(scale, mHeader.mLogo);
+//                }
+//            }
 
             if (this.settings.hideToolbarAndTitle && mHeader.toolbarLayout != null) {
                 boolean scrollUp = lastYOffset < yOffset;
