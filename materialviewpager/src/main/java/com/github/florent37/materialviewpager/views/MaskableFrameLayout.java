@@ -21,7 +21,7 @@ import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.AttributeSet;
-import android.util.DisplayMetrics;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.ViewTreeObserver;
 import android.widget.FrameLayout;
@@ -58,21 +58,7 @@ public class MaskableFrameLayout extends FrameLayout {
         }
     };
 
-    public int dpToPx(int dp) {
-        DisplayMetrics displayMetrics = getContext().getResources().getDisplayMetrics();
-        int px = Math.round(dp * (displayMetrics.xdpi / DisplayMetrics.DENSITY_DEFAULT));
-        return px;
-    }
-
-    public int pxToDp(int px) {
-        DisplayMetrics displayMetrics = getContext().getResources().getDisplayMetrics();
-        int dp = Math.round(px / (displayMetrics.xdpi / DisplayMetrics.DENSITY_DEFAULT));
-        return dp;
-    }
-
     //Constants
-    private static final String TAG = "MaskableFrameLayout";
-
     private static final int MODE_ADD = 0;
     private static final int MODE_CLEAR = 1;
     private static final int MODE_DARKEN = 2;
@@ -131,7 +117,7 @@ public class MaskableFrameLayout extends FrameLayout {
         mHandler = new Handler();
         setDrawingCacheEnabled(true);
         if (Build.VERSION.SDK_INT >= 11) {
-            setLayerType(LAYER_TYPE_SOFTWARE, null); //Only works for software layers
+            setLayerType(LAYER_TYPE_SOFTWARE, null);
         }
         mPaint = createPaint();
         Resources.Theme theme = context.getTheme();
@@ -293,15 +279,15 @@ public class MaskableFrameLayout extends FrameLayout {
 
     //Logging
     private void log(@NonNull String message) {
-//        Log.d(TAG, message);
+        Log.d(MaskableFrameLayout.class.getName(), "mask->" + message);
     }
 
     //Animation
     @Override
     public void invalidateDrawable(Drawable dr) {
         if (dr != null) {
-//            initMasks();
-//            swapBitmapMask();
+//  initMasks();
+            swapBitmapMask();
             invalidate();
         }
     }
@@ -351,6 +337,7 @@ public class MaskableFrameLayout extends FrameLayout {
 
     //Utils
     private PorterDuffXfermode getModeFromInteger(int index) {
+        log("getModeFromInteger");
         PorterDuff.Mode mode = null;
         switch (index) {
             case MODE_ADD:
@@ -416,7 +403,6 @@ public class MaskableFrameLayout extends FrameLayout {
             default:
                 mode = PorterDuff.Mode.DST_IN;
         }
-        log("Mode is " + mode.toString());
         return new PorterDuffXfermode(mode);
     }
 

@@ -326,10 +326,10 @@ public class MaterialViewPagerAnimator {
      * Change the color of the statusbackground, toolbar, toolbarlayout and pagertitlestrip
      * With a color transition animation
      *
-     * @param color    the final color
+     * @param colorAlpha    the final color
      * @param duration the transition color animation duration
      */
-    public void setColor(int color, int duration) {
+    public void setColor(int colorAlpha, int duration) {
 
 //            ValueAnimator colorAnim = ObjectAnimator.ofInt(mHeader.headerBackground, "backgroundColor", settings.color, color);
 //            colorAnim.setEvaluator(new ArgbEvaluator());
@@ -350,13 +350,11 @@ public class MaterialViewPagerAnimator {
 //                }
 //            });
 
-        int colorAlpha = color;
         mHeader.headerBackground.setBackgroundColor(colorAlpha);
         mHeader.statusBackground.setBackgroundColor(colorAlpha);
         mHeader.toolbar.setBackgroundColor(colorAlpha);
         mHeader.toolbarLayoutBackground.setBackgroundColor(colorAlpha);
-        mHeader.mPagerSlidingTabStrip.setBackgroundColor(colorAlpha);
-        settings.color = color;
+        settings.color = colorAlpha;
         setColorPercent(lastPercent);
 
     }
@@ -388,15 +386,13 @@ public class MaterialViewPagerAnimator {
             setBackgroundColor(
                     colorWithAlpha(this.settings.color, percent),
                     mHeader.toolbar,
-                    mHeader.toolbarLayoutBackground,
-                    mHeader.mPagerSlidingTabStrip
+                    mHeader.toolbarLayoutBackground
             );
         } else {
             setBackgroundColor(
                     colorWithAlpha(this.settings.color, 0),
                     mHeader.toolbar,
-                    mHeader.toolbarLayoutBackground,
-                    mHeader.mPagerSlidingTabStrip
+                    mHeader.toolbarLayoutBackground
             );
         }
 
@@ -405,7 +401,6 @@ public class MaterialViewPagerAnimator {
                     (percent == 1) ? elevation : 0,
                     mHeader.toolbar,
                     mHeader.toolbarLayoutBackground,
-                    mHeader.mPagerSlidingTabStrip,
                     mHeader.mLogo
             );
     }
