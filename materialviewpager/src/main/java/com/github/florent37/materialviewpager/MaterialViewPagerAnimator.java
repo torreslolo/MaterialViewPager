@@ -590,10 +590,10 @@ public class MaterialViewPagerAnimator {
 
                     //only if yOffset changed
                     if (isNewYOffset(yOffset)) {
-                        Log.d(MaterialViewPagerAnimator.class.getName(), "s)[" + pos + "]dy=" + dy + "-> onScrolled ->" + yOffset);
+//                        Log.d(MaterialViewPagerAnimator.class.getName(), "s)[" + pos + "]dy=" + dy + "-> onScrolled ->" + yOffset);
                         onMaterialScrolled(recyclerView, yOffset);
                     } else {
-                        Log.d(MaterialViewPagerAnimator.class.getName(), "n)[" + pos + "]dy=" + dy + "-> onScrolled ->" + yOffset);
+//                        Log.d(MaterialViewPagerAnimator.class.getName(), "n)[" + pos + "]dy=" + dy + "-> onScrolled ->" + yOffset);
                     }
                 }
             });
